@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CD Timers">
+<meta name="theme-color" content="#c41c1c">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<title>Crimson Desert Timers</title>
+<link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0a0808; --surface:#140e0e; --surface-2:#1c1414; --surface-3:#241a1a;
+  --border:rgba(196,28,28,0.2); --border-sub:rgba(255,255,255,0.06);
+  --text:#e8ddd0; --text-m:#8a7a72; --text-f:#4a3a35;
+  --red:#c41c1c; --red-h:#a01515; --gold:#c8961a; --green:#4a8c2a;
+  --font-d:'Cinzel',serif; --font-b:'General Sans','Helvetica Neue',sans-serif;
+  --r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:20px;--r-full:9999px;
+  --tr:180ms cubic-bezier(0.16,1,0.3,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:none;-webkit-font-smoothing:antialiased}
+body{min-height:100dvh;font-family:var(--font-b);font-size:15px;color:var(--text);background:var(--bg);overflow-x:hidden}
+button{cursor:pointer;background:none;border:none;font:inherit;color:inherit}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--surface-3)}
+
+.app{display:flex;flex-direction:column;min-height:100dvh;max-width:520px;margin:0 auto;padding:0 16px 80px}
+
+header{display:flex;align-items:center;gap:12px;padding:16px 0 20px;border-bottom:1px solid var(--border-sub)}
+.logo{width:38px;height:38px;flex-shrink:0}
+.hd{flex:1}
+.hd h1{font-family:var(--font-d);font-size:clamp(0.95rem,0.8rem+1.2vw,1.2rem);font-weight:700;letter-spacing:0.04em;line-height:1.1}
+.hd span{font-size:0.65rem;color:var(--text-m);letter-spacing:0.08em;text-transform:uppercase}
+.hacts{display:flex;gap:8px}
+.ibtn{width:36px;height:36px;border-radius:var(--r-full);display:flex;align-items:center;justify-content:center;background:var(--surface-2);border:1px solid var(--border-sub);color:var(--text-m);transition:all var(--tr);flex-shrink:0}
+.ibtn:hover{background:var(--surface-3);color:var(--text)}
+.ibtn.on{color:var(--gold);border-color:rgba(200,150,26,0.5);background:rgba(200,150,26,0.1)}
+
+.banner{margin-top:12px;padding:10px 14px;border-radius:var(--r-md);background:rgba(196,28,28,0.1);border:1px solid rgba(196,28,28,0.25);display:flex;align-items:center;gap:10px;font-size:0.78rem}
+.banner svg{flex-shrink:0;color:var(--red)}
+.banner span{flex:1;color:var(--text-m);line-height:1.4}
+.banner button{flex-shrink:0;padding:4px 12px;background:var(--red);color:#fff;border-radius:var(--r-full);font-size:0.74rem;font-weight:600;transition:background var(--tr)}
+.banner button:hover{background:var(--red-h)}
+.banner.hide{display:none}
+
+.stitle{font-family:var(--font-d);font-size:0.66rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-m);padding:20px 0 10px;display:flex;align-items:center;gap:8px}
+.stitle::after{content:'';flex:1;height:1px;background:var(--border-sub)}
+
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pc{background:var(--surface);border:1px solid var(--border-sub);border-radius:var(--r-lg);padding:14px;cursor:pointer;transition:all var(--tr);display:flex;flex-direction:column;gap:6px;position:relative;overflow:hidden;text-align:left;-webkit-tap-highlight-color:transparent}
+.pc:hover{border-color:var(--border);transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,0,0,0.4)}
+.pc:active{transform:translateY(0);transition-duration:80ms;background:var(--surface-2)}
+.pe{font-size:1.3rem;line-height:1}
+.pn{font-size:0.8rem;font-weight:600;color:var(--text);line-height:1.2}
+.pd{font-size:0.7rem;color:var(--red);font-weight:700}
+.pi{font-size:0.62rem;color:var(--text-f)}
+.pc.add{border-style:dashed;border-color:rgba(196,28,28,0.25);align-items:center;justify-content:center;min-height:86px}
+.pc.add .pe{color:var(--red);opacity:0.7;font-size:1.6rem}
+.pc.add .pn{color:var(--text-m)}
+
+.atimers{display:flex;flex-direction:column;gap:10px}
+.empty{display:flex;flex-direction:column;align-items:center;padding:40px 20px;color:var(--text-f);text-align:center;gap:12px}
+.empty svg{opacity:0.25}
+.empty p{font-size:0.78rem;max-width:26ch;line-height:1.5;color:var(--text-m)}
+
+.tc{background:var(--surface);border:1px solid var(--border-sub);border-radius:var(--r-xl);padding:16px;display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;transition:all var(--tr);position:relative}
+.tc::after{content:'';position:absolute;left:0;top:12px;bottom:12px;width:3px;background:var(--red);border-radius:0 2px 2px 0;opacity:0;transition:opacity var(--tr)}
+.tc.running::after{opacity:1}
+.tc.completed{border-color:rgba(74,140,42,0.4);box-shadow:0 0 18px rgba(74,140,42,0.12)}
+.tc.completed::after{background:var(--green);opacity:1}
+.tc.paused::after{background:var(--gold);opacity:0.9}
+
+.rw{position:relative;width:72px;height:72px;flex-shrink:0}
+.rw svg{transform:rotate(-90deg)}
+.rb{fill:none;stroke:var(--surface-3);stroke-width:5}
+.rf{fill:none;stroke:var(--red);stroke-width:5;stroke-linecap:round;stroke-dasharray:188.5;stroke-dashoffset:0;transition:stroke-dashoffset 1s linear,stroke 0.3s}
+.rt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
+.rtm{font-size:0.68rem;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;letter-spacing:-0.02em;line-height:1}
+.rtp{font-size:0.48rem;color:var(--text-f)}
+.tc.completed .rf{stroke:var(--green)}
+.tc.paused .rf{stroke:var(--gold)}
+
+.ti{display:flex;flex-direction:column;gap:5px}
+.tn{font-size:0.88rem;font-weight:600;color:var(--text);line-height:1.2}
+.tm{font-size:0.68rem;color:var(--text-m)}
+.ts{font-size:0.65rem;font-weight:700;letter-spacing:0.05em;text-transform:uppercase}
+.ts.running{color:var(--red)}.ts.paused{color:var(--gold)}.ts.completed{color:var(--green)}
+.tcs{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap}
+.cb{height:28px;padding:0 10px;border-radius:var(--r-full);font-size:0.68rem;font-weight:600;border:1px solid var(--border-sub);background:var(--surface-2);color:var(--text-m);transition:all var(--tr);display:flex;align-items:center;gap:3px;-webkit-tap-highlight-color:transparent}
+.cb:hover{background:var(--surface-3);color:var(--text)}
+.cb.p{background:rgba(196,28,28,0.12);border-color:rgba(196,28,28,0.35);color:var(--red)}
+.cb.p:hover{background:rgba(196,28,28,0.22)}
+.cb.d{color:var(--text-f)}.cb.d:hover{color:#e84444;background:rgba(232,68,68,0.08);border-color:rgba(232,68,68,0.3)}
+.cb.g{background:rgba(74,140,42,0.12);border-color:rgba(74,140,42,0.35);color:var(--green)}
+
+@keyframes pulse-green{0%,100%{box-shadow:0 0 0 0 rgba(74,140,42,0.4)}50%{box-shadow:0 0 0 6px rgba(74,140,42,0)}}
+.tc.completed{animation:pulse-green 1.8s ease 3}
+
+.mb{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:100;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.25s}
+.mb.open{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border:1px solid var(--border-sub);border-radius:var(--r-xl) var(--r-xl) 0 0;padding:20px 20px 36px;width:100%;max-width:520px;transform:translateY(40px);transition:transform 0.3s cubic-bezier(0.16,1,0.3,1)}
+.mb.open .modal{transform:translateY(0)}
+.mh{width:32px;height:4px;background:var(--surface-3);border-radius:2px;margin:0 auto 20px}
+.modal h2{font-family:var(--font-d);font-size:0.95rem;font-weight:700;letter-spacing:0.05em;margin-bottom:16px}
+.fg{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.fg label{font-size:0.66rem;font-weight:600;color:var(--text-m);letter-spacing:0.07em;text-transform:uppercase}
+.fg input{background:var(--surface-2);border:1px solid var(--border-sub);border-radius:var(--r-md);padding:10px 14px;font-size:1rem;color:var(--text);transition:border-color var(--tr);-webkit-appearance:none;width:100%}
+.fg input:focus{outline:none;border-color:var(--red)}
+.frow{display:flex;gap:10px}
+.frow .fg{flex:1}
+.frow input[type=number]{text-align:center}
+.fbtns{display:flex;gap:10px;margin-top:6px}
+.bp{flex:1;padding:14px;background:var(--red);color:#fff;border-radius:var(--r-md);font-weight:700;font-size:0.88rem;transition:background var(--tr)}
+.bp:hover{background:var(--red-h)}
+.bs{padding:14px 20px;background:var(--surface-2);color:var(--text-m);border-radius:var(--r-md);font-weight:600;font-size:0.88rem;border:1px solid var(--border-sub);transition:all var(--tr)}
+.bs:hover{background:var(--surface-3);color:var(--text)}
+
+.tc-wrap{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;gap:8px;pointer-events:none;width:min(340px,calc(100vw - 32px))}
+.toast{background:var(--surface-3);border:1px solid var(--border);border-radius:var(--r-lg);padding:10px 14px;font-size:0.8rem;color:var(--text);box-shadow:0 8px 24px rgba(0,0,0,0.6);display:flex;align-items:center;gap:10px;animation:ti 0.3s cubic-bezier(0.16,1,0.3,1)}
+@keyframes ti{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+.toast.fo{animation:to 0.3s ease forwards}
+@keyframes to{to{opacity:0;transform:translateY(-8px)}}
+
+.ibar{margin-top:14px;padding:10px 14px;border-radius:var(--r-md);background:var(--surface);border:1px solid var(--border-sub);font-size:0.68rem;color:var(--text-m);display:flex;flex-wrap:wrap;gap:12px;justify-content:center;line-height:1.5}
+.ibar b{color:var(--text-f)}
+footer{margin-top:auto;padding-top:28px;text-align:center;font-size:0.62rem;color:var(--text-f);line-height:1.6}
+</style>
+</head>
+<body>
+<div class="app">
+
+<header>
+  <svg class="logo" viewBox="0 0 40 40" fill="none" aria-label="CD Timers">
+    <circle cx="20" cy="20" r="19" fill="#1a0808" stroke="#c41c1c" stroke-width="1.5"/>
+    <polygon points="20,28 14,24 14,19 20,16 26,19 26,24" fill="#c41c1c"/>
+    <rect x="18.5" y="5" width="3" height="22" rx="1.5" fill="#e8ddd0"/>
+    <rect x="13" y="16" width="14" height="3" rx="1.5" fill="#c8961a"/>
+    <polygon points="18.5,27 21.5,27 20,32" fill="#bbb"/>
+  </svg>
+  <div class="hd">
+    <h1>Crimson Desert</h1>
+    <span>Timer Companion</span>
+  </div>
+  <div class="hacts">
+    <button class="ibtn" id="installBtn" style="display:none" title="Install App" onclick="installPWA()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    </button>
+    <button class="ibtn" id="notifBtn" title="Enable notifications" onclick="reqNotif()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="banner" id="nb">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+  <span>Enable notifications — your phone will alert you while playing on another device.</span>
+  <button onclick="reqNotif()">Enable</button>
+</div>
+
+<div class="stitle">Quick Start</div>
+<div class="pgrid">
+  <div class="pc" onclick="sp('bpay','🏦 Bank Payout',7200000,'24 in-game hrs','Bank payout ready')">
+    <span class="pe">🏦</span><span class="pn">Bank Payout</span>
+    <span class="pd">2h 00m</span><span class="pi">24 in-game hours</span>
+  </div>
+  <div class="pc" onclick="sp('bref','💰 Bank Refresh',21600000,'3 in-game days','Bank investment cycle ready')">
+    <span class="pe">💰</span><span class="pn">Bank Refresh</span>
+    <span class="pd">6h 00m</span><span class="pi">3 in-game days</span>
+  </div>
+  <div class="pc" onclick="sp('dsc','🛡️ Dispatch: Security',3900000,'13 in-game hrs','Security dispatch complete')">
+    <span class="pe">🛡️</span><span class="pn">Dispatch: Security</span>
+    <span class="pd">1h 05m</span><span class="pi">13 in-game hours</span>
+  </div>
+  <div class="pc" onclick="sp('dst','⚔️ Dispatch: Standard',5100000,'17 in-game hrs','Standard dispatch complete')">
+    <span class="pe">⚔️</span><span class="pn">Dispatch: Standard</span>
+    <span class="pd">1h 25m</span><span class="pi">17 in-game hours</span>
+  </div>
+  <div class="pc" onclick="sp('dlg','🗡️ Dispatch: Long',5400000,'18 in-game hrs','Long dispatch complete')">
+    <span class="pe">🗡️</span><span class="pn">Dispatch: Long</span>
+    <span class="pd">1h 30m</span><span class="pi">18 in-game hours</span>
+  </div>
+  <div class="pc" onclick="sp('vend','🛒 Vendor Restock',7200000,'Midnight 0:00 each day','Vendors have restocked')">
+    <span class="pe">🛒</span><span class="pn">Vendor Restock</span>
+    <span class="pd">2h 00m</span><span class="pi">Every midnight</span>
+  </div>
+  <div class="pc" onclick="sp('slp','😴 Sleep Cooldown',3000000,'10 in-game hrs','Sleep cooldown ready')">
+    <span class="pe">😴</span><span class="pn">Sleep Cooldown</span>
+    <span class="pd">50m 00s</span><span class="pi">10 in-game hours</span>
+  </div>
+  <div class="pc add" onclick="openM()">
+    <span class="pe">＋</span><span class="pn">Custom Timer</span>
+  </div>
+</div>
+
+<div class="stitle" id="atitle" style="display:none">Active Timers</div>
+<div class="atimers" id="atimers">
+  <div class="empty" id="empt">
+    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    <p>Tap a preset above to start a timer. You'll be notified when it's ready.</p>
+  </div>
+</div>
+
+<div class="ibar">
+  <span><b>Time ratio:</b> 1 in-game hr = 5 real mins</span>
+  <span><b>Full day:</b> ~2 real hours</span>
+</div>
+
+<footer>Crimson Desert Companion · Not affiliated with Pearl Abyss<br>Install to home screen for best background notification support</footer>
+</div>
+
+<!-- MODAL -->
+<div class="mb" id="mb" onclick="mbClick(event)">
+  <div class="modal">
+    <div class="mh"></div>
+    <h2>Custom Timer</h2>
+    <div class="fg"><label>Timer Name</label>
+      <input type="text" id="cn" placeholder="e.g. Camp Provisions" maxlength="40">
+    </div>
+    <div class="frow">
+      <div class="fg"><label>Hours</label><input type="number" id="ch" value="0" min="0" max="99" inputmode="numeric"></div>
+      <div class="fg"><label>Minutes</label><input type="number" id="cm" value="30" min="0" max="59" inputmode="numeric"></div>
+      <div class="fg"><label>Seconds</label><input type="number" id="cs" value="0" min="0" max="59" inputmode="numeric"></div>
+    </div>
+    <div class="fbtns">
+      <button class="bs" onclick="closeM()">Cancel</button>
+      <button class="bp" onclick="startCustom()">Start Timer</button>
+    </div>
+  </div>
+</div>
+
+<div class="tc-wrap" id="tco"></div>
+
+<script>
+let timers = [];
+let swReg = null;
+let deferredPrompt = null;
+let tickInt = null;
+const CIRC = 2 * Math.PI * 30;
+
+function save(){ try{ localStorage.setItem('cdt', JSON.stringify(timers)); }catch(e){} }
+function load(){
+  try{
+    const d = localStorage.getItem('cdt');
+    if(d) timers = JSON.parse(d);
+    timers = timers.filter(t => t.status !== 'completed' || (Date.now()-t.endTime)<120000);
+  }catch(e){ timers=[]; }
+}
+
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js').then(r=>{ swReg=r; }).catch(()=>{});
+}
+function swMsg(msg){
+  const sw = swReg?.active || swReg?.installing || swReg?.waiting;
+  if(sw) sw.postMessage(msg);
+}
+
+function updNotifUI(){
+  const ok = Notification.permission==='granted';
+  document.getElementById('nb').classList.toggle('hide', ok||Notification.permission==='denied');
+  document.getElementById('notifBtn').classList.toggle('on', ok);
+}
+async function reqNotif(){
+  if(!('Notification' in window)){ toast('🔕','Notifications not supported'); return; }
+  const p = await Notification.requestPermission();
+  updNotifUI();
+  toast(p==='granted'?'🔔':'🔕', p==='granted'?'Notifications enabled!':'Notifications blocked — check browser settings');
+}
+function fireNotif(title, body){
+  if(Notification.permission==='granted'){
+    try{ new Notification(title,{body,icon:'./icon-192.png'}); }catch(e){}
+  }
+}
+
+window.addEventListener('beforeinstallprompt', e=>{
+  e.preventDefault(); deferredPrompt=e;
+  document.getElementById('installBtn').style.display='flex';
+});
+function installPWA(){
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(r=>{
+    if(r.outcome==='accepted') toast('📱','App installed to home screen!');
+    deferredPrompt=null; document.getElementById('installBtn').style.display='none';
+  });
+}
+
+const uid=()=>Math.random().toString(36).slice(2,8);
+
+function sp(pid,name,dur,meta,nb){
+  createTimer({id:pid+'_'+uid(),name,duration:dur,meta,notifBody:nb});
+}
+
+function createTimer({id,name,duration,meta='',notifBody='Timer ready'}){
+  if(duration<=0){ toast('⚠️','Duration must be > 0'); return; }
+  const now=Date.now();
+  const t={id,name,duration,startTime:now,endTime:now+duration,pausedAt:null,elapsed:0,status:'running',meta,notifBody};
+  timers.push(t);
+  swMsg({type:'SCHEDULE',id,title:`✅ ${name}`,body:notifBody,endTime:t.endTime});
+  save(); render(); startTick(); toast('▶️',`Timer started: ${name}`);
+}
+
+function pauseT(id){
+  const t=timers.find(x=>x.id===id); if(!t||t.status!=='running') return;
+  t.pausedAt=Date.now(); t.elapsed=t.pausedAt-t.startTime; t.status='paused';
+  swMsg({type:'CANCEL',id}); save(); render();
+}
+function resumeT(id){
+  const t=timers.find(x=>x.id===id); if(!t||t.status!=='paused') return;
+  const now=Date.now(); t.startTime=now-t.elapsed; t.endTime=t.startTime+t.duration;
+  t.pausedAt=null; t.status='running';
+  swMsg({type:'SCHEDULE',id,title:`✅ ${t.name}`,body:t.notifBody,endTime:t.endTime});
+  save(); render(); startTick();
+}
+function resetT(id){
+  const t=timers.find(x=>x.id===id); if(!t) return;
+  const now=Date.now(); t.startTime=now; t.endTime=now+t.duration;
+  t.pausedAt=null; t.elapsed=0; t.status='running';
+  swMsg({type:'SCHEDULE',id,title:`✅ ${t.name}`,body:t.notifBody,endTime:t.endTime});
+  save(); render(); startTick();
+}
+function removeT(id){
+  swMsg({type:'CANCEL',id}); timers=timers.filter(x=>x.id!==id); save(); render();
+}
+
+function tick(){
+  let any=false;
+  timers.forEach(t=>{
+    if(t.status==='running'){
+      const rem=t.endTime-Date.now();
+      if(rem<=0){
+        t.status='completed'; save();
+        fireNotif(`✅ ${t.name}`, t.notifBody);
+        toast('✅',`${t.name} — Complete!`,6000);
+      } else { any=true; }
+      updCard(t);
+    }
+  });
+  if(!any){ clearInterval(tickInt); tickInt=null; }
+}
+function startTick(){ if(!tickInt) tickInt=setInterval(tick,500); }
+function remMs(t){
+  if(t.status==='paused') return t.duration-t.elapsed;
+  if(t.status==='completed') return 0;
+  return Math.max(0,t.endTime-Date.now());
+}
+function fmt(ms){
+  if(ms<=0) return '00:00:00';
+  const s=Math.ceil(ms/1000),h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sc=s%60;
+  return `${pad(h)}:${pad(m)}:${pad(sc)}`;
+}
+const pad=n=>String(n).padStart(2,'0');
+const esc=s=>(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const sLabel=s=>s==='running'?'RUNNING':s==='paused'?'PAUSED':'COMPLETE ✓';
+
+function render(){
+  const con=document.getElementById('atimers');
+  const emp=document.getElementById('empt');
+  const ttl=document.getElementById('atitle');
+  if(timers.length===0){
+    con.innerHTML=''; con.appendChild(emp);
+    emp.style.display='flex'; ttl.style.display='none'; return;
+  }
+  emp.style.display='none'; ttl.style.display='flex';
+  const have=new Set([...con.querySelectorAll('.tc')].map(el=>el.dataset.id));
+  const cur=new Set(timers.map(t=>t.id));
+  have.forEach(id=>{ if(!cur.has(id)) con.querySelector(`[data-id="${id}"]`)?.remove(); });
+  timers.forEach((t,i)=>{
+    let card=con.querySelector(`[data-id="${t.id}"]`);
+    if(!card){ card=buildCard(t); con.insertBefore(card, con.children[i]||null); }
+    else updCard(t,card);
+  });
+}
+
+function buildCard(t){
+  const rem=remMs(t), pct=t.duration>0?(1-rem/t.duration):1;
+  const off=CIRC*(1-pct);
+  const d=document.createElement('div');
+  d.className=`tc ${t.status}`; d.dataset.id=t.id;
+  d.innerHTML=`
+    <div class="rw"><svg width="72" height="72" viewBox="0 0 72 72">
+      <circle class="rb" cx="36" cy="36" r="30"/>
+      <circle class="rf" cx="36" cy="36" r="30" style="stroke-dashoffset:${off}"/>
+    </svg><div class="rt"><span class="rtm">${fmt(rem)}</span><span class="rtp">${Math.round(pct*100)}%</span></div></div>
+    <div class="ti">
+      <div class="tn">${esc(t.name)}</div>
+      <div class="tm">${esc(t.meta)}</div>
+      <div class="ts ${t.status}">${sLabel(t.status)}</div>
+      <div class="tcs">${ctls(t)}</div>
+    </div>`;
+  return d;
+}
+
+function updCard(t,card){
+  card=card||document.querySelector(`[data-id="${t.id}"]`); if(!card) return;
+  const rem=remMs(t), pct=t.duration>0?(1-rem/t.duration):1, off=CIRC*(1-pct);
+  card.className=`tc ${t.status}`;
+  const rf=card.querySelector('.rf'); if(rf) rf.style.strokeDashoffset=off;
+  const rtm=card.querySelector('.rtm'); if(rtm) rtm.textContent=fmt(rem);
+  const rtp=card.querySelector('.rtp'); if(rtp) rtp.textContent=Math.round(pct*100)+'%';
+  const ts=card.querySelector('.ts'); if(ts){ts.className=`ts ${t.status}`;ts.textContent=sLabel(t.status);}
+  const tcs=card.querySelector('.tcs'); if(tcs) tcs.innerHTML=ctls(t);
+}
+
+function ctls(t){
+  const id=t.id;
+  if(t.status==='completed') return `<button class="cb g" onclick="resetT('${id}')">↺ Restart</button><button class="cb d" onclick="removeT('${id}')">✕ Dismiss</button>`;
+  if(t.status==='paused') return `<button class="cb p" onclick="resumeT('${id}')">▶ Resume</button><button class="cb" onclick="resetT('${id}')">↺ Reset</button><button class="cb d" onclick="removeT('${id}')">✕</button>`;
+  return `<button class="cb p" onclick="pauseT('${id}')">⏸ Pause</button><button class="cb" onclick="resetT('${id}')">↺ Reset</button><button class="cb d" onclick="removeT('${id}')">✕</button>`;
+}
+
+function openM(){ document.getElementById('mb').classList.add('open'); setTimeout(()=>document.getElementById('cn').focus(),300); }
+function closeM(){ document.getElementById('mb').classList.remove('open'); }
+function mbClick(e){ if(e.target===document.getElementById('mb')) closeM(); }
+function startCustom(){
+  const name=document.getElementById('cn').value.trim()||'Custom Timer';
+  const h=parseInt(document.getElementById('ch').value)||0;
+  const m=parseInt(document.getElementById('cm').value)||0;
+  const s=parseInt(document.getElementById('cs').value)||0;
+  const dur=(h*3600+m*60+s)*1000;
+  if(dur<=0){ toast('⚠️','Enter a duration greater than 0'); return; }
+  closeM();
+  createTimer({id:'c_'+uid(),name,duration:dur,meta:`Custom: ${h}h ${m}m ${s}s`,notifBody:`${name} ready`});
+}
+
+function toast(icon,msg,dur=3200){
+  const c=document.getElementById('tco');
+  const t=document.createElement('div'); t.className='toast';
+  t.innerHTML=`<span>${icon}</span><span>${esc(msg)}</span>`;
+  c.appendChild(t);
+  setTimeout(()=>{ t.classList.add('fo'); setTimeout(()=>t.remove(),400); }, dur);
+}
+
+document.addEventListener('visibilitychange',()=>{
+  if(!document.hidden){
+    timers.forEach(t=>{ if(t.status==='running'&&t.endTime<=Date.now()){ t.status='completed'; save(); }});
+    render(); startTick();
+  }
+});
+
+load(); updNotifUI(); render();
+if(timers.some(t=>t.status==='running')) startTick();
+</script>
+</body>
+</html>
